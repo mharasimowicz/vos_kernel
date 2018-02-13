@@ -4,34 +4,32 @@ AC = nasm
 ACC = i686-elf-as # gcc assembly compiler probably will be removed later
 AFLAGS = -f elf
 RUNTIME = qemu-system-i386
+ISOFILE = vos.iso
+BINFILE = vos.bin
 
 
 runcd: makeiso
-	$(RUNTIME) -cdrom bin/vos.iso
+	$(RUNTIME) -cdrom bin/$(ISOFILE)
 
 
-makeiso: vos.bin
+makeiso: bin_file
 	mkdir -p isodir/boot/grub
-	cp bin/vos.bin isodir/boot/vos.bin
+	cp bin/$(BINFILE) isodir/boot/$(BINFILE)
 	cp grub.cfg isodir/boot/grub/grub.cfg
-	grub-mkrescue -o bin/vos.iso isodir
+	grub-mkrescue -o bin/$(ISOFILE) isodir
 
 
-run: vos.bin
-	$(RUNTIME) -kernel bin/vos.bin
+run: bin_file
+	$(RUNTIME) -kernel bin/$(BINFILE)
 
-all: vos.bin
+all: bin_file
 
-
-clean:
-	rm bin -rf
-	rm isodir -rf
 
 bin_folder:
 	mkdir bin
 
-vos.bin: boot.o kernel.o cpu.o io.o gdt_asm.o gdt.o idt_asm.o idt.o tss.o isrs.o irq.o bin_folder
-	$(CC) -T src/linker.ld -o bin/vos.bin -ffreestanding -O2 -nostdlib bin/boot.o bin/kernel.o bin/cpu.o bin/io.o bin/string.o bin/stdio.o bin/terminal.o bin/keyboard.o bin/gdt_asm.o bin/gdt.o bin/idt_asm.o bin/idt.o bin/tss.o bin/isrs.o bin/irq.o -lgcc
+bin_file: boot.o kernel.o cpu.o io.o gdt_asm.o gdt.o idt_asm.o idt.o tss.o isrs.o irq.o bin_folder
+	$(CC) -T src/linker.ld -o bin/$(BINFILE) -ffreestanding -O2 -nostdlib bin/boot.o bin/kernel.o bin/cpu.o bin/io.o bin/string.o bin/stdio.o bin/terminal.o bin/keyboard.o bin/gdt_asm.o bin/gdt.o bin/idt_asm.o bin/idt.o bin/tss.o bin/isrs.o bin/irq.o -lgcc
 
 cpu.o: bin_folder
 	$(AC) $(AFLAGS) -o bin/cpu.o src/drivers/cpu/cpu.asm
@@ -79,3 +77,9 @@ terminal.o: bin_folder
 
 keyboard.o: bin_folder
 	$(CC) -c src/drivers/keyboard/keyboard.c -o bin/keyboard.o $(CFLAGS)
+
+.PHONY: clean
+
+clean:
+	rm bin -rf
+	rm isodir -rf
