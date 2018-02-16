@@ -22,3 +22,17 @@ Copyright 2018 Michał Harasimowicz
 ```bash
 make runcd
 ```
+
+## debugging
+
+```bash
+make debug
+
+# connect from second terminal
+
+gdb
+(gdb) target remote localhost:1234
+(gdb) symbol_file ./bin/vos.bin
+(gdb) break kernel_main
+(gdb) continue
+```

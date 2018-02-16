@@ -1,15 +1,15 @@
 CC = i686-elf-gcc
-CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra -g -ggdb -gdwarf -DDEBUG
 AC = nasm
 ACC = i686-elf-as # gcc assembly compiler probably will be removed later
-AFLAGS = -f elf
+AFLAGS = -f elf -g
 RUNTIME = qemu-system-i386
 ISOFILE = vos.iso
 BINFILE = vos.bin
 
 
 runcd: makeiso
-	$(RUNTIME) -cdrom bin/$(ISOFILE)
+	$(RUNTIME) -cdrom bin/$(ISOFILE) -s -S -no-reboot
 
 
 makeiso: bin_file
@@ -18,6 +18,8 @@ makeiso: bin_file
 	cp grub.cfg isodir/boot/grub/grub.cfg
 	grub-mkrescue -o bin/$(ISOFILE) isodir
 
+debug: bin_file
+	$(RUNTIME) -s -S -kernel bin/$(BINFILE)
 
 run: bin_file
 	$(RUNTIME) -kernel bin/$(BINFILE)
