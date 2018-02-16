@@ -9,7 +9,7 @@ BINFILE = vos.bin
 
 
 runcd: makeiso
-	$(RUNTIME) -cdrom bin/$(ISOFILE) -s -S -no-reboot
+	$(RUNTIME) -cdrom bin/$(ISOFILE) -no-reboot
 
 
 makeiso: bin_file

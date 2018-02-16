@@ -22,36 +22,63 @@ SECTION .text
 
 global idt_flush
 
-idt_flush:
-    push ebp
-    mov ebp, esp
+; idt_flush:
+;     push ebp
+;     mov ebp, esp
     
-    mov eax, [ebp + 8]
-    lidt [eax]
+;     mov eax, [ebp + 8]
+;     lidt [eax]
 
-    pop ebp
-    ret
-  
-; int_handler:
+;     pop ebp
+;     ret
+
+int_handler_49:
+    mov ax, 0x10
+    mov gs, ax
+    mov dword [gs:0xB8000],') : '
+int_handler_49_done:
+    hlt
+
+; int_handler_1:
 ;     mov ax, 0x10
 ;     mov gs, ax
-;     mov dword [gs:0xB8000],') : '
+;     mov dword [gs:0xB8000],': D '
+; int_handler_1_done:
 ;     hlt
  
-;  idt:
-;     resd 50*2 ; 400 bytes
+ idt:
+    resd 50*2 ; 400 bytes
  
-;  idtr:
-;     dw (50*8)-1
-;     dd idt
+ idtr:
+    dw (50*8)-1
+    dd idt
 
-;  idt_flush:
-;     lidt [idtr]
-;     mov eax,int_handler
-;     mov [idt+49*8],ax
-;     mov word [idt+49*8+2],0x10
-;     mov word [idt+49*8+4],0x8E00
-;     shr eax,16
-;     mov [idt+49*8+6],ax
-;     sti
-;     int 49
+idt_flush:
+    lidt [idtr]
+    
+
+    mov eax,int_handler_49
+    mov [idt+49*8],ax
+    mov word [idt+49*8+2],0x08
+    mov word [idt+49*8+4],0x8E00
+    shr eax,16
+    mov [idt+49*8+6],ax
+
+    ; mov eax,int_handler_1
+    ; mov [idt+0x21*8],ax
+    ; mov word [idt+0x21*8+2],0x08
+    ; mov word [idt+0x21*8+4],0x8E00
+    ; shr eax,16
+    ; mov [idt+0x21*8+6],ax
+
+    cli ; flushing current interrupts
+    sti
+
+    ; mov al, 0xfd
+    ; out 0x21, al
+    ; mov al, 0xff
+    ; out 0xa1, al  
+    ; ; int 48
+    int 49
+
+    ;sti
