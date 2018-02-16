@@ -8,11 +8,11 @@
 #include "../../libc/string.h"
 
 typedef struct {
-	uint16_t base_low;
-	uint16_t sel;
-	uint8_t zero;
-	uint8_t flags;
-	uint16_t base_high;
+	uint16_t offset_low;		// offset bits 0..15
+	uint16_t selector;			// a code segment selector in GDT 
+	uint8_t zero;				// unused, set to 0
+	uint8_t type;				// type and attributes
+	uint16_t offset_high;		// offset bits 16..31
 } __attribute__((packed)) idt_entry_t;
 
 typedef struct {
@@ -28,14 +28,12 @@ static struct {
 
 #define ENTRY(X) (idt.entries[(X)])
 
-typedef void (*idt_gate_t)(void);
-
-void idt_set_gate(uint8_t num, idt_gate_t base, uint16_t sel, uint8_t flags) {
-	ENTRY(num).base_low = ((uintptr_t)base & 0xFFFF);
-	ENTRY(num).base_high = ((uintptr_t)base >> 16) & 0xFFFF;
-	ENTRY(num).sel = sel;
+void idt_set_gate(uint8_t num, idt_gate_t base, uint16_t selector, uint8_t typeflags) {
+	ENTRY(num).offset_low = ((uintptr_t)base & 0xFFFF);
+	ENTRY(num).offset_high = ((uintptr_t)base >> 16) & 0xFFFF;
+	ENTRY(num).selector = selector;
 	ENTRY(num).zero = 0;
-	ENTRY(num).flags = flags | 0x60;
+	ENTRY(num).type = typeflags | 0x60;
 }
 
 void idt_install(void) {

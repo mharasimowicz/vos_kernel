@@ -33,7 +33,6 @@ static struct {
     tss_entry_t tss;
 } gdt __attribute__((used));
 
-//extern void gdt_flush(uint32_t);
 
 #define ENTRY(X) (gdt.entries[(X)])
 
@@ -53,18 +52,21 @@ void gdt_set_gate(uint8_t num, uint64_t base, uint64_t limit, uint8_t access, ui
 
 static void write_tss(int32_t num, uint16_t ss0, uint32_t esp0);
 
+//
+// installing gdt - right now, we are are using all available RAM for all segments
+//
 void gdt_install(void) {
 	gdt_pointer_t *gdtp = &gdt.pointer;
 	gdtp->limit = sizeof gdt.entries - 1;
 	gdtp->base = (uint32_t)&ENTRY(0);
 
-	gdt_set_gate(0, 0, 0, 0, 0);                /* NULL segment */
+	gdt_set_gate(0, 0, 0, 0, 0);                /* required NULL segment */
 	gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); /* Code segment */
 	gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF); /* Data segment */
 	gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); /* User code */
 	gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); /* User data */
 
-	write_tss(5, 0x10, 0x0);
+	write_tss(5, 0x10, 0x0); /* Task segment */
 
 	/* Go go go */
 	gdt_flush((uint32_t)gdtp);
