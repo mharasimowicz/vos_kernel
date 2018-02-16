@@ -69,7 +69,7 @@ void kernel_main(const multiboot_info_t* mbt, const uint32_t magic, const uint32
 	gdt_install();      /* Global descriptor table */
     //idt.entries[0x21].
     //idt_set_gate(0x21, 0, 0, 0x6);
-	//idt_install();      /* IDT */
+	idt_install();      /* IDT */
 	//isrs_install();     /* Interrupt service requests */
     //irq_install();      /* Hardware interrupt requests */
     
