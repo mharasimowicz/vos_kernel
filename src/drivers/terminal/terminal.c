@@ -148,7 +148,7 @@ void terminal_putdec_l(const uint64_t number) {
     
     for(; i > 0; i--) {
         
-        uint32_t shifted = temp / mask;
+        uint64_t shifted = temp / mask;
         
         char to_show = ((char)shifted) + ascii;
         

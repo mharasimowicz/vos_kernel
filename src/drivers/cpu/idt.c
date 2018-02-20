@@ -5,74 +5,68 @@
 
 #include <stdint.h>
 #include "idt.h"
-#include "../../libc/string.h"
 #include "../io/io.h"
 
-typedef struct {
-	uint16_t offset_low;		// offset bits 0..15
-	uint16_t selector;			// a code segment selector in GDT 
-	uint8_t zero;				// unused, set to 0
-	uint8_t type;				// type and attributes
-	uint16_t offset_high;		// offset bits 16..31
-} __attribute__((packed)) idt_entry_t;
+#define INTERRUPT_GATE 0x8e
+#define KERNEL_CODE_SEGMENT_OFFSET 0x08
+#define IDT_SIZE 256
 
-typedef struct {
-	uint16_t limit;
-	uintptr_t base;
-} __attribute__((packed)) idt_pointer_t;
 
-/* In the future we may need to put a lock on the access of this */
-static struct {
-	idt_entry_t entries[256];
-	idt_pointer_t pointer;
-} idt __attribute__((used));
+struct IDT_entry IDT[IDT_SIZE];
 
-#define ENTRY(X) (idt.entries[(X)])
+void handle_interrupt(uint8_t interruptNumber, unsigned long handlerPtr)
+{
+	unsigned long interrupt_address;
 
-void idt_set_gate(uint8_t num, idt_gate_t base, uint16_t selector, uint8_t typeflags) {
-	ENTRY(num).offset_low = ((uintptr_t)base & 0xFFFF);
-	ENTRY(num).offset_high = ((uintptr_t)base >> 16) & 0xFFFF;
-	ENTRY(num).selector = selector;
-	ENTRY(num).zero = 0;
-	ENTRY(num).type = typeflags | 0x60;
+	/* populate IDT entry of interrupt */
+	interrupt_address = handlerPtr;
+	IDT[interruptNumber].offset_lowerbits = interrupt_address & 0xffff;
+	IDT[interruptNumber].selector = KERNEL_CODE_SEGMENT_OFFSET;
+	IDT[interruptNumber].zero = 0;
+	IDT[interruptNumber].type_attr = INTERRUPT_GATE;
+	IDT[interruptNumber].offset_higherbits = (interrupt_address & 0xffff0000) >> 16;
 }
-
-void init_pics(int pic1, int pic2);
 
 void idt_install(void) {
-	idt_pointer_t * idtp = &idt.pointer;
-	idtp->limit = sizeof idt.entries - 1;
-	idtp->base = (uintptr_t)&ENTRY(0);
-	memset(&ENTRY(0), 0, sizeof idt.entries);
+	unsigned long idt_address;
+	unsigned long idt_ptr[2];
 
-	idt_flush((uintptr_t)idtp);
-	init_pics(0x20, 0x28);
+	/*     Ports
+	*	 PIC1	PIC2
+	*Command 0x20	0xA0
+	*Data	 0x21	0xA1
+	*/
+
+	/* ICW1 - begin initialization */
+	outb(0x20 , 0x11);
+	outb(0xA0 , 0x11);
+
+	/* ICW2 - remap offset address of IDT */
+	/*
+	* In x86 protected mode, we have to remap the PICs beyond 0x20 because
+	* Intel have designated the first 32 interrupts as "reserved" for cpu exceptions
+	*/
+	outb(0x21 , 0x20);
+	outb(0xA1 , 0x28);
+
+	/* ICW3 - setup cascading */
+	outb(0x21 , 0x00);
+	outb(0xA1 , 0x00);
+
+	/* ICW4 - environment info */
+	outb(0x21 , 0x01);
+	outb(0xA1 , 0x01);
+	/* Initialization finished */
+
+	/* mask interrupts */
+	outb(0x21 , 0xff);
+	outb(0xA1 , 0xff);
+
+	/* fill the IDT descriptor */
+	idt_address = (unsigned long)IDT ;
+	idt_ptr[0] = (sizeof (struct IDT_entry) * IDT_SIZE) + ((idt_address & 0xffff) << 16);
+	idt_ptr[1] = idt_address >> 16 ;
+
+	idt_flush(idt_ptr);
 }
 
-#define PIC1 0x20
-#define PIC2 0xA0
-
-#define ICW1 0x11
-#define ICW4 0x01
-
-void init_pics(int pic1, int pic2)
-{
-   /* send ICW1 */
-   outb(PIC1, ICW1);
-   outb(PIC2, ICW1);
-
-   /* send ICW2 */
-   outb(PIC1 + 1, pic1);   
-   outb(PIC2 + 1, pic2);   
-
-   /* send ICW3 */
-   outb(PIC1 + 1, 4);   
-   outb(PIC2 + 1, 2);
-
-   /* send ICW4 */
-   outb(PIC1 + 1, ICW4);
-   outb(PIC2 + 1, ICW4);
-
-   /* disable all IRQs */
-   outb(PIC1 + 1, 0xFF);
-}

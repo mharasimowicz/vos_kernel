@@ -6,6 +6,8 @@
 #ifndef __KEYBOARD_H
 #define __KEYBOARD_H
 
-char getScancode();
+void kb_init(void);
+
+void keyboard_handler_main(void);
 
 #endif

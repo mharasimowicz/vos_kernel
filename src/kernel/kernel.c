@@ -35,6 +35,7 @@ extern "C" /* Use C linkage for kernel_main. */
 void show_basic_info(const int terminal);
 void show_branding_info(const int terminal);
 void show_multiboot_info(const multiboot_info_t* mbt, const int terminal);
+extern void keyboard_handler(void);
 
 int handleFirstInterrupt(struct regs * registers) {
     terminal_putchar('x');
@@ -67,22 +68,13 @@ void kernel_main(const multiboot_info_t* mbt, const uint32_t magic, const uint32
     
     /* Initialize core modules */
 	gdt_install();      /* Global descriptor table */
-    //idt.entries[0x21].
-    //idt_set_gate(0x21, 0, 0, 0x6);
+    handle_interrupt(0x21, (unsigned long)keyboard_handler);
 	idt_install();      /* IDT */
+    kb_init();
 	//isrs_install();     /* Interrupt service requests */
     //irq_install();      /* Hardware interrupt requests */
     
-    //irq_install_handler(0x08, &handleFirstInterrupt);
     while(1) {}
-    //
-    // while(1) {
-    //     const char scanCode = getScancode();
-
-    //     terminal_puthex(scanCode);
-
-    //     terminal_putchar(' ');
-    // }
 }
 
 
@@ -130,8 +122,16 @@ void show_multiboot_info(const multiboot_info_t* mbt, const int terminal) {
     terminal_puthex_l(mbt->mem_lower);
     terminal_newline();
 
+    terminal_putdec(mbt->mem_lower);
+    fputs("kbs of lower memory", terminal);
+    terminal_newline();
+
     fputs("mem_upper:  ", terminal);
     terminal_puthex_l(mbt->mem_upper);
+    terminal_newline();
+
+    terminal_putdec(mbt->mem_upper);
+    fputs("kbs of upper memory", terminal);
     terminal_newline();
 
     fputs("mmap_addr:  ", terminal);
