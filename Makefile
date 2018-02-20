@@ -30,8 +30,8 @@ all: bin_file
 bin_folder:
 	mkdir bin
 
-bin_file: boot.o kernel.o cpu.o io.o gdt_asm.o gdt.o idt_asm.o idt.o tss.o isrs.o irq.o bin_folder
-	$(CC) -T src/linker.ld -o bin/$(BINFILE) -ffreestanding -O2 -nostdlib bin/boot.o bin/kernel.o bin/cpu.o bin/io.o bin/string.o bin/stdio.o bin/terminal.o bin/keyboard.o bin/gdt_asm.o bin/gdt.o bin/idt_asm.o bin/idt.o bin/tss.o bin/isrs.o bin/irq.o -lgcc
+bin_file: boot.o kernel.o cpu.o io.o stdio.o stdlib.o string.o gdt_asm.o gdt.o idt_asm.o idt.o tss.o isrs.o irq.o memory.o liballoc.o bin_folder
+	$(CC) -T src/linker.ld -o bin/$(BINFILE) -ffreestanding -O2 -nostdlib bin/boot.o bin/kernel.o bin/cpu.o bin/io.o bin/string.o bin/stdio.o bin/stdlib.o bin/terminal.o bin/keyboard.o bin/gdt_asm.o bin/gdt.o bin/idt_asm.o bin/idt.o bin/tss.o bin/isrs.o bin/irq.o bin/memory.o bin/liballoc.o -lgcc
 
 cpu.o: bin_folder
 	$(AC) $(AFLAGS) -o bin/cpu.o src/drivers/cpu/cpu.asm
@@ -71,6 +71,9 @@ kernel.o: bin_folder string.o stdio.o terminal.o keyboard.o gdt.o gdt_asm.o idt.
 stdio.o: bin_folder
 	$(CC) -c src/libc/stdio/stdio.c -o bin/stdio.o $(CFLAGS)
 
+stdlib.o: bin_folder
+	$(CC) -c src/libc/stdlib/stdlib.c -o bin/stdlib.o $(CFLAGS)
+
 string.o: bin_folder
 	$(CC) -c src/libc/string/string.c -o bin/string.o $(CFLAGS)
 
@@ -79,6 +82,12 @@ terminal.o: bin_folder
 
 keyboard.o: bin_folder
 	$(CC) -c src/drivers/keyboard/keyboard.c -o bin/keyboard.o $(CFLAGS)
+
+memory.o: bin_folder
+	$(CC) -c src/drivers/memory/memory.c -o bin/memory.o $(CFLAGS)
+
+liballoc.o: bin_folder
+	$(CC) -c src/drivers/memory/liballoc_1_1.c -o bin/liballoc.o $(CFLAGS)
 
 .PHONY: clean
 

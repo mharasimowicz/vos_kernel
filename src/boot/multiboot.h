@@ -1,3 +1,11 @@
+/*
+	VOS kernel
+	Copyright 2018 Michal Harasimowicz
+*/
+
+#ifndef __MULTIBOOT_H
+#define __MULTIBOOT_H 1
+
 /* multiboot.h - the header for Multiboot */
 /* Copyright (C) 1999, 2001  Free Software Foundation, Inc.
 
@@ -126,3 +134,5 @@ typedef struct multiboot_memory_map {
 } multiboot_memory_map_t;
 
 #endif /* ! ASM */
+
+#endif

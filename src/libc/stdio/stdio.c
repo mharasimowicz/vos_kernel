@@ -279,3 +279,7 @@ void printf (const char *format, ...)
 		}
 	}
 }
+
+int fflush(void* stream){
+	return 0;
+}

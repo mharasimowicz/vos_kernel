@@ -18,5 +18,6 @@ int putchar(const char c);
 int puts(const char *s);
 int sprintf ( char * str, const char * format, ...); //...
 void printf (const char *format, ...);
+int fflush(void* stream);
 
 #endif
