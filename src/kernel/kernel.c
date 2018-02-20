@@ -37,19 +37,15 @@ void show_branding_info(const int terminal);
 void show_multiboot_info(const multiboot_info_t* mbt, const int terminal);
 extern void keyboard_handler(void);
 
-int handleFirstInterrupt(struct regs * registers) {
-    terminal_putchar('x');
-}
-
 void kernel_main(const multiboot_info_t* mbt, const uint32_t magic, const uint32_t esp)
 {
     
 	/* Initialize terminal interface */
 	const uint32_t terminal = terminal_initialize();
 
-    fputs("esp:", terminal);
-    terminal_puthex(esp);
-    terminal_newline();
+    // fputs("esp:", terminal);
+    // terminal_puthex(esp);
+    // terminal_newline();
 
     if(magic != MULTIBOOT_BOOTLOADER_MAGIC)
     {
@@ -60,7 +56,7 @@ void kernel_main(const multiboot_info_t* mbt, const uint32_t magic, const uint32
         return;
     }
          
-    fputs("Hello, kernel World!\n", terminal);
+    // fputs("Hello, kernel World!\n", terminal);
     
     //show_basic_info(terminal);
     //show_branding_info(terminal);
@@ -114,51 +110,60 @@ void show_branding_info(const int terminal) {
 }
 
 void show_multiboot_info(const multiboot_info_t* mbt, const int terminal) {
-    fputs("Booting from device #:", terminal);
-    terminal_puthex(mbt->boot_device);
-    terminal_newline();
+    // fputs("Booting from device #:", terminal);
+    // terminal_puthex(mbt->boot_device);
+    // terminal_newline();
 
-    fputs("mem_lower:  ", terminal);
-    terminal_puthex_l(mbt->mem_lower);
-    terminal_newline();
+    // fputs("mem_lower:  ", terminal);
+    // terminal_puthex_l(mbt->mem_lower);
+    // terminal_newline();
 
-    terminal_putdec(mbt->mem_lower);
-    fputs("kbs of lower memory", terminal);
-    terminal_newline();
+    // terminal_putdec(mbt->mem_lower);
+    // fputs("kbs of lower memory", terminal);
+    // terminal_newline();
 
-    fputs("mem_upper:  ", terminal);
-    terminal_puthex_l(mbt->mem_upper);
-    terminal_newline();
+    // fputs("mem_upper:  ", terminal);
+    // terminal_puthex_l(mbt->mem_upper);
+    // terminal_newline();
 
-    terminal_putdec(mbt->mem_upper);
-    fputs("kbs of upper memory", terminal);
-    terminal_newline();
+    // terminal_putdec(mbt->mem_upper);
+    // fputs("kbs of upper memory", terminal);
+    // terminal_newline();
 
-    fputs("mmap_addr:  ", terminal);
-    terminal_puthex_l(mbt->mmap_addr);
-    terminal_newline();
+    // fputs("mmap_addr:  ", terminal);
+    // terminal_puthex_l(mbt->mmap_addr);
+    // terminal_newline();
 
-    fputs("mmap_length:", terminal);
-    terminal_puthex_l(mbt->mmap_length);
-    terminal_newline();
+    // fputs("mmap_length:", terminal);
+    // terminal_puthex_l(mbt->mmap_length);
+    // terminal_newline();
 
-    fputs("mods_count: ", terminal);
-    terminal_puthex_l(mbt->mods_count);
-    terminal_newline();
+    // fputs("mods_count: ", terminal);
+    // terminal_puthex_l(mbt->mods_count);
+    // terminal_newline();
 
-    fputs("mods_addr:  ", terminal);
-    terminal_puthex_l(mbt->mods_addr);
-    terminal_newline();
+    // fputs("mods_addr:  ", terminal);
+    // terminal_puthex_l(mbt->mods_addr);
+    // terminal_newline();
 
     fputs("memory_map:\n", terminal);
 
-    memory_map_t* mmap = mbt->mmap_addr;
+    multiboot_memory_map_t* mmap = mbt->mmap_addr;
     int i = 0;
 
 	while(mmap < mbt->mmap_addr + mbt->mmap_length) {
         terminal_putdec(i);
         fputs("|", terminal);
-        terminal_puthex(mmap);
+        terminal_puthex_l(mmap);
+        //terminal_newline();
+        fputs("|type:", terminal);
+        terminal_putdec(mmap->type);
+        terminal_newline();
+        fputs("base_addr:", terminal);
+        terminal_putdec(mmap->base_addr);
+        // terminal_newline();
+        fputs("|lenght:", terminal);
+        terminal_putdec(mmap->length);
         terminal_newline();
 
 		//...

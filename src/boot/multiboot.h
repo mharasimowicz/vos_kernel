@@ -104,17 +104,17 @@ typedef struct module
     unsigned long reserved;
 } module_t;
 
-/* The memory map. Be careful that the offset 0 is base_addr_low
-but no size. */
-typedef struct memory_map
-{
-    unsigned long size;
-    unsigned long base_addr_low;
-    unsigned long base_addr_high;
-    unsigned long length_low;
-    unsigned long length_high;
-    unsigned long type;
-} memory_map_t;
+// /* The memory map. Be careful that the offset 0 is base_addr_low
+// but no size. */
+// typedef struct memory_map
+// {
+//     unsigned long size;
+//     unsigned long base_addr_low;
+//     unsigned long base_addr_high;
+//     unsigned long length_low;
+//     unsigned long length_high;
+//     unsigned long type;
+// } memory_map_t;
 
 typedef struct multiboot_memory_map {
 	unsigned int size;

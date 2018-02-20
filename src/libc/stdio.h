@@ -17,5 +17,6 @@ int putc(const char c, int stream); // FILE *stream);
 int putchar(const char c);
 int puts(const char *s);
 int sprintf ( char * str, const char * format, ...); //...
+void printf (const char *format, ...);
 
 #endif
